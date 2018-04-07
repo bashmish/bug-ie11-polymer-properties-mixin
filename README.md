@@ -1,3 +1,5 @@
+This is a live demo for Polymer's issue https://github.com/Polymer/polymer/issues/5183
+
 ```sh
 bower install
 polymer serve
