@@ -1,0 +1,35 @@
+<link rel="import" href="../../polymer/lib/mixins/properties-mixin.html">
+
+<script>
+  class BrokenIe extends Polymer.PropertiesMixin(HTMLElement) {
+    static get properties() {
+      return Object.assign({}, super.properties, {
+        works: {
+          type: 'Boolean',
+        },
+        disabled: {
+          type: 'Boolean',
+        },
+      });
+    }
+
+    static createProperties(props) {
+      console.log(`createProperties: ${Object.keys(props)}`);
+      window.methodsCalled.createProperties.push({ props });
+      super.createProperties(props);
+    }
+
+    _createPropertyAccessor(property, readOnly) {
+      console.log(`_createPropertyAccessor: ${property}`);
+      window.methodsCalled._createPropertyAccessor.push({ property, readOnly });
+      super._createPropertyAccessor(property, readOnly);
+    }
+
+    _propertiesChanged(props, newValues, oldValues) {
+      console.log(`properties changed: ${Object.keys(props)}`);
+      window.methodsCalled._propertiesChanged.push({ props, newValues, oldValues });
+    }
+  }
+
+  customElements.define('broken-ie', BrokenIe);
+</script>

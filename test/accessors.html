@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>tests accessors registration</title>
+    <meta charset="utf-8">
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../web-component-tester/browser.js"></script>
+    <link rel="import" href="broken-ie.html">
+  </head>
+  <body>
+    <test-fixture id="creation">
+      <template>
+        <broken-ie></broken-ie>
+      </template>
+    </test-fixture>
+    <test-fixture id="change-works">
+      <template>
+        <broken-ie works></broken-ie>
+      </template>
+    </test-fixture>
+    <test-fixture id="change-disabled">
+      <template>
+        <broken-ie disabled></broken-ie>
+      </template>
+    </test-fixture>
+    <script>
+      describe('Polymer.PropertiesMixin', () => {
+        window.methodsCalled = {
+          createProperties: [],        // called only once for each class
+          _createPropertyAccessor: [], // called only once for each property
+          _propertiesChanged: [],      // called on every change
+        };
+
+        beforeEach(() => {
+          window.methodsCalled._propertiesChanged = [];
+        })
+
+        it('starts creating properties', () => {
+          const creation = fixture('creation');
+          expect(window.methodsCalled.createProperties).to.have.lengthOf(1);
+        });
+
+        it('creates 2 properties accessors', () => {
+          // broken for IE11
+          // _createPropertyAccessor was called only once
+          const creation = fixture('creation');
+          expect(window.methodsCalled._createPropertyAccessor).to.have.lengthOf(2);
+        });
+
+        it('registers property accessors for "works"', () => {
+          const creation = fixture('creation');
+          expect(window.methodsCalled._createPropertyAccessor[0]).to.exist;
+          expect(window.methodsCalled._createPropertyAccessor[0].property).to.equal('works');
+        });
+
+        it('registers property accessors for "disabled"', () => {
+          // broken for IE11
+          // accessor is not registered for "disabled"
+          const creation = fixture('creation');
+          expect(window.methodsCalled._createPropertyAccessor[1]).to.exist;
+          expect(window.methodsCalled._createPropertyAccessor[1].property).to.equal('disabled');
+        });
+
+        it('reacts to the change of property "works"', () => {
+          const creation = fixture('change-works');
+          expect(window.methodsCalled._propertiesChanged).to.have.lengthOf(1);
+          expect(window.methodsCalled._propertiesChanged[0].newValues.works).to.exist;
+        });
+
+        it('reacts to the change of property "disabled"', () => {
+          // broken for IE11
+          // change is not detected
+          const creation = fixture('change-disabled');
+          expect(window.methodsCalled._propertiesChanged).to.have.lengthOf(1);
+          expect(window.methodsCalled._propertiesChanged[0].newValues.disabled).to.exist;
+        });
+      });
+
+      describe('HTMLElement.prototype', () => {
+        const diffOwnPropsIE11Chrome65 = 'canHaveChildren,canHaveHTML,children,classList,className,currentStyle,disabled,hideFocus,id,innerHTML,isDisabled,isMultiLine,isTextEdit,language,onactivate,onbeforeactivate,onbeforecopy,onbeforecut,onbeforedeactivate,onbeforepaste,oncopy,oncut,ondeactivate,onfocusin,onfocusout,onhelp,onmscontentzoom,onmsmanipulationstatechanged,onpaste,onselectstart,onstal,runtimeStyle'.split(',');
+        diffOwnPropsIE11Chrome65.forEach((property) => {
+          it(`doesn't have own property "${property}"`, () => {
+            expect(Object.getOwnPropertyNames(HTMLElement.prototype)).to.not.include(property);
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
